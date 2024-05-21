@@ -1,28 +1,34 @@
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native'
 import React, { useState } from 'react'
-import { events } from '../components/events'
+import { events, Event } from '../components/events'
+import EventDetail from './EventDetail'
 
 const Events = () => {
 
-  const [selectEvent, setSelectEvent] = useState(null)
+  const [selectEvent, setSelectEvent] = useState<Event | null>(null);
 
-
+  if (selectEvent) {
+    return <EventDetail event={selectEvent} onBack={() => setSelectEvent(null)} />;
+  }
 
   return (
-    <View style={{alignSelf: 'center', marginTop: 250}}>
-       <FlatList  
+    <View style={{ alignSelf: 'center', marginTop: 180 }}>
+      <Text style={{fontSize: 30, alignSelf: 'center'}}>EVENTOS DISPONIBLES</Text>
+      <FlatList
         data={events}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => setSelectEvent(item)}>
+          <TouchableOpacity onPress={() => {
+            setSelectEvent(item);
+          }}>
             <Text style={styles.nameEvento}>{item.nombre}</Text>
             <Text style={styles.nameEvento}>{item.descripcion}</Text>
           </TouchableOpacity>
         )}
       />
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   nameEvento: {
