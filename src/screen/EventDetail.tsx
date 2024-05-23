@@ -1,15 +1,34 @@
 import { View, Text, Button, FlatList, Image, StyleSheet, ScrollView } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import * as ImagePicker from 'expo-image-picker'
+import * as MedialLibrary from 'expo-media-library'
 
 const EventDetail = ({event, onBack}) => {
 
   const [image, setImage] = useState([]);
+  const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState(false);
+
+  useEffect(()=> {
+  (async () => {
+    const {status} = await MedialLibrary.requestPermissionsAsync();
+    setHasMediaLibraryPermission(status === 'granted')
+  })
+  }, [])
+
+
+  const saveImage = async (uri) => {
+        try {
+          const asset = await MedialLibrary.createAssetAsync(uri);
+          await MedialLibrary.createAlbumAsync('Event Photos', asset, false)
+        } catch (error) {
+          console.error(error)
+        }
+  }
 
   const selectImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
+      allowsEditing: false,
       aspect: [4, 3],
       quality: 1
     });
@@ -21,13 +40,14 @@ const EventDetail = ({event, onBack}) => {
   const pickPicture = async () => {
     let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
+      allowsEditing: false,
       aspect: [4, 3],
       quality: 1
     })
 
      if(!result.canceled) {
       setImage([...image, result.assets[0].uri]);
+      await saveImage(result.assets[0].uri)
      }
   }
 
